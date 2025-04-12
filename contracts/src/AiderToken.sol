@@ -27,10 +27,11 @@ contract AiderToken is ERC20, Ownable {
             revert AiderToken__InsufficientPayment();
         }
 
-        uint256 tokensToMint = msg.value / TOKEN_PRICE;
+        uint256 tokensToMint = msg.value / TOKEN_PRICE; // Number of tokens (e.g., 5)
+        uint256 amountToMint = tokensToMint * (10**decimals()); // Amount in base units (e.g., 5 * 10**18)
         uint256 refundAmount = msg.value % TOKEN_PRICE;
 
-        _mint(msg.sender, tokensToMint);
+        _mint(msg.sender, amountToMint); // Mint the correct amount in base units
 
         // Refund excess ETH if any
         if (refundAmount > 0) {
