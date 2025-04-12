@@ -76,10 +76,48 @@ forge snapshot
 
 ### Local Development Node (Anvil)
 
-Start a local blockchain node:
+Start a local blockchain node in a separate terminal:
 ```shell
 anvil
 ```
+Anvil will typically start on `http://127.0.0.1:8545`. It will also list available accounts and their private keys, which you can import into MetaMask.
+
+**Connecting MetaMask to Anvil:**
+1. Open MetaMask and click on the network dropdown.
+2. Select "Add network" or "Custom RPC".
+3. Enter the following details:
+    * Network Name: Anvil Local
+    * New RPC URL: `http://127.0.0.1:8545`
+    * Chain ID: `31337`
+    * Currency Symbol: ETH
+4. Save the network.
+5. Import an Anvil account using one of the private keys logged by the `anvil` command.
+
+### Deploy Locally to Anvil
+
+Deploy the `AiderToken` contract to your running Anvil instance:
+
+**Prerequisites:**
+
+*   Ensure Anvil is running.
+*   Set the `PRIVATE_KEY` environment variable to one of the private keys provided by Anvil when it started. You can do this temporarily in your terminal:
+    ```shell
+    export PRIVATE_KEY=<anvil_private_key>
+    ```
+
+**Deployment Command:**
+
+```shell
+forge script script/AiderToken.s.sol:DeployScript --rpc-url http://127.0.0.1:8545 --private-key $PRIVATE_KEY --broadcast
+```
+
+*   `--broadcast`: Sends the transaction to the local Anvil network.
+*   The script will output the deployed contract address. **Copy this address.**
+
+**Update Frontend:**
+
+*   Open `app/page.tsx` in your editor.
+*   Replace the placeholder value for `contractAddress` with the address you just copied from the deployment output.
 
 ### Deploy to Base Sepolia
 
