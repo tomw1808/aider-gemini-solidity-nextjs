@@ -25,23 +25,23 @@ contract AiderTokenTest is Test {
 
     // --- Test Deployment ---
 
-    function test_Deployment_SetsCorrectOwner() public {
+    function test_Deployment_SetsCorrectOwner() public view {
         assertEq(aiderToken.owner(), owner, "Owner should be set correctly");
     }
 
-    function test_Deployment_SetsCorrectName() public {
+    function test_Deployment_SetsCorrectName() public view {
         assertEq(aiderToken.name(), "AIDER", "Name should be AIDER");
     }
 
-    function test_Deployment_SetsCorrectSymbol() public {
+    function test_Deployment_SetsCorrectSymbol() public view {
         assertEq(aiderToken.symbol(), "AID", "Symbol should be AID");
     }
 
-    function test_Deployment_SetsCorrectDecimals() public {
+    function test_Deployment_SetsCorrectDecimals() public view {
         assertEq(aiderToken.decimals(), 18, "Decimals should be 18");
     }
 
-    function test_Deployment_InitialTotalSupplyIsZero() public {
+    function test_Deployment_InitialTotalSupplyIsZero() public view {
         assertEq(aiderToken.totalSupply(), 0, "Initial total supply should be 0");
     }
 
@@ -151,14 +151,16 @@ contract AiderTokenTest is Test {
         (bool success, ) = address(aiderToken).call{value: TOKEN_PRICE - 1 wei}(""); // Removed sender option
         // The external call itself might succeed, but the internal logic reverts.
         // Foundry's expectRevert should catch this. If not, need a more specific check.
-        // assertTrue(!success); // Alternatively, check if the call itself failed, though expectRevert is better.
+        assertTrue(!success); // Alternatively, check if the call itself failed, though expectRevert is better.
     }
 
      function test_RevertWhen_Receive_ZeroAmount() public {
         // Sending zero ETH directly should revert inside buyTokens
         vm.prank(user1); // Set the sender for the next call
         vm.expectRevert(AiderToken.AiderToken__InsufficientPayment.selector);
-        (bool success, ) = address(aiderToken).call{value: 0}(""); // Removed sender option
+        (bool success, ) = address(aiderToken).call{value: 0}(""); // Removed sender option        
+        assertTrue(!success); // Alternatively, check if the call itself failed, though expectRevert is better.
+
     }
 
 
