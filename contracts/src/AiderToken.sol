@@ -22,7 +22,7 @@ contract AiderToken is ERC20, Ownable {
      *      Requires msg.value to be at least TOKEN_PRICE.
      *      Refunds any ETH sent in excess of the cost of whole tokens.
      */
-    function buyTokens() external payable {
+    function buyTokens() public payable { // Changed from external to public
         if (msg.value < TOKEN_PRICE) {
             revert AiderToken__InsufficientPayment();
         }
