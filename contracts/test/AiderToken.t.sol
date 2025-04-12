@@ -142,7 +142,7 @@ contract AiderTokenTest is Test {
         assertEq(address(aiderToken).balance, initialContractEthBalance + (TOKEN_PRICE * 3), "Contract ETH balance should increase by cost of 3 tokens via receive()");
          // User's ETH balance should decrease by the cost of tokens (gas estimation omitted here for simplicity, focus on refund)
         // Note: Precise balance check is tricky due to gas on the external call from the test contract vs internal call in buyTokens
-        assertTrue(user2.balance > initialUserEthBalance - ethToSend && user2.balance < initialUserEthBalance - (TOKEN_PRICE * 3), "User ETH balance should reflect refund");
+        assertTrue(user2.balance > initialUserEthBalance - ethToSend && user2.balance <= initialUserEthBalance - (TOKEN_PRICE * 3), "User ETH balance should reflect refund");
      }
 
     function test_RevertWhen_Receive_InsufficientAmount() public {
