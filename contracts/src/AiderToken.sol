@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract AiderToken is ERC20, Ownable {
     uint256 public constant TOKEN_PRICE = 0.1 ether; // Price per token in ETH (wei)
 
-    error AiderToken__IncorrectPaymentAmount();
+    error AiderToken__InsufficientPayment();
     error AiderToken__TransferFailed();
 
     constructor(address initialOwner) ERC20("AIDER", "AID") Ownable(initialOwner) {
@@ -19,15 +19,37 @@ contract AiderToken is ERC20, Ownable {
     /**
      * @notice Allows users to buy tokens by sending ETH.
      * @dev Mints new tokens to the sender based on the ETH sent and the TOKEN_PRICE.
-     *      Requires msg.value to be a multiple of TOKEN_PRICE.
+     *      Requires msg.value to be at least TOKEN_PRICE.
+     *      Refunds any ETH sent in excess of the cost of whole tokens.
      */
     function buyTokens() external payable {
-        if (msg.value == 0 || msg.value % TOKEN_PRICE != 0) {
-            revert AiderToken__IncorrectPaymentAmount();
+        if (msg.value < TOKEN_PRICE) {
+            revert AiderToken__InsufficientPayment();
         }
 
         uint256 tokensToMint = msg.value / TOKEN_PRICE;
+        uint256 refundAmount = msg.value % TOKEN_PRICE;
+
         _mint(msg.sender, tokensToMint);
+
+        // Refund excess ETH if any
+        if (refundAmount > 0) {
+            (bool success, ) = msg.sender.call{value: refundAmount}("");
+            if (!success) {
+                revert AiderToken__TransferFailed();
+                // Note: In a real-world scenario, consider the implications
+                // if the refund fails (e.g., user contract cannot receive ETH).
+                // The tokens are already minted at this point.
+            }
+        }
+    }
+
+    /**
+     * @notice Allows direct ETH transfers to the contract to buy tokens.
+     * @dev Calls the buyTokens function internally.
+     */
+    receive() external payable {
+        buyTokens();
     }
 
     /**

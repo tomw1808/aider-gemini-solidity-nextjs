@@ -5,8 +5,10 @@ This project implements a standard ERC20 token named "AIDER" with the symbol "AI
 ## Features
 
 *   **ERC20 Standard:** Compliant with the ERC20 token standard.
-*   **Token Sale:** Users can purchase AIDER tokens directly from the contract by sending ETH.
-    *   **Price:** 1 AID = 0.1 ETH
+*   **Token Sale:** Users can purchase AIDER tokens directly from the contract.
+    *   **Price:** 1 AID = 0.1 ETH.
+    *   **Purchase:** Send ETH to the `buyTokens()` function or directly to the contract address (`receive()` function).
+    *   **Refunds:** If you send more ETH than needed for a whole number of tokens, the excess amount (less than 0.1 ETH) will be automatically refunded to you. You must send at least 0.1 ETH.
 *   **Ownable:** The contract includes ownership management using OpenZeppelin's `Ownable`, allowing the owner to withdraw collected ETH.
 *   **No Initial Supply:** Tokens are minted only when purchased.
 
@@ -103,7 +105,9 @@ forge script script/AiderToken.s.sol:DeployScript --rpc-url $RPC_URL --private-k
 Use `cast` to interact with the deployed contract. Examples:
 
 *   **Check Token Name:** `cast call <CONTRACT_ADDRESS> "name()(string)" --rpc-url $RPC_URL`
-*   **Buy Tokens (Example: Buy 2 AID):** `cast send <CONTRACT_ADDRESS> "buyTokens()" --value 0.2ether --rpc-url $RPC_URL --private-key <your_user_private_key>`
+*   **Buy Tokens (Example: Buy 2 AID with exact ETH):** `cast send <CONTRACT_ADDRESS> "buyTokens()" --value 0.2ether --rpc-url $RPC_URL --private-key <your_user_private_key>`
+*   **Buy Tokens (Example: Send 0.25 ETH, receive 2 AID + 0.05 ETH refund):** `cast send <CONTRACT_ADDRESS> "buyTokens()" --value 0.25ether --rpc-url $RPC_URL --private-key <your_user_private_key>`
+*   **Buy Tokens via Direct Send (Example: Send 0.1 ETH):** `cast send <CONTRACT_ADDRESS> --value 0.1ether --rpc-url $RPC_URL --private-key <your_user_private_key>`
 *   **Check Balance:** `cast call <CONTRACT_ADDRESS> "balanceOf(address)(uint256)" <YOUR_ADDRESS> --rpc-url $RPC_URL`
 *   **Withdraw ETH (as owner):** `cast send <CONTRACT_ADDRESS> "withdraw()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY`
 
