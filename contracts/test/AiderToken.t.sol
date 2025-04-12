@@ -115,7 +115,8 @@ contract AiderTokenTest is Test {
         assertEq(initialUserBalance, 0);
 
         // Send ETH directly to the contract
-        (bool success, ) = address(aiderToken).call{value: TOKEN_PRICE, sender: user1}("");
+        vm.prank(user1); // Set the sender for the next call
+        (bool success, ) = address(aiderToken).call{value: TOKEN_PRICE}(""); // Removed sender option
         assertTrue(success, "Direct ETH transfer should succeed");
 
         uint256 expectedTokens = 1 * (10**aiderToken.decimals());
@@ -130,7 +131,8 @@ contract AiderTokenTest is Test {
         uint256 initialContractEthBalance = address(aiderToken).balance;
 
         // Send ETH directly
-        (bool success, ) = address(aiderToken).call{value: ethToSend, sender: user2}("");
+        vm.prank(user2); // Set the sender for the next call
+        (bool success, ) = address(aiderToken).call{value: ethToSend}(""); // Removed sender option
         assertTrue(success, "Direct ETH transfer with excess should succeed");
 
         uint256 expectedTokens = 3 * (10**aiderToken.decimals());
@@ -144,16 +146,19 @@ contract AiderTokenTest is Test {
 
     function test_RevertWhen_Receive_InsufficientAmount() public {
         // Sending less than TOKEN_PRICE directly should revert inside buyTokens
+        vm.prank(user1); // Set the sender for the next call
         vm.expectRevert(AiderToken.AiderToken__InsufficientPayment.selector);
-        (bool success, ) = address(aiderToken).call{value: TOKEN_PRICE - 1 wei, sender: user1}("");
+        (bool success, ) = address(aiderToken).call{value: TOKEN_PRICE - 1 wei}(""); // Removed sender option
         // The external call itself might succeed, but the internal logic reverts.
         // Foundry's expectRevert should catch this. If not, need a more specific check.
+        // assertTrue(!success); // Alternatively, check if the call itself failed, though expectRevert is better.
     }
 
      function test_RevertWhen_Receive_ZeroAmount() public {
         // Sending zero ETH directly should revert inside buyTokens
+        vm.prank(user1); // Set the sender for the next call
         vm.expectRevert(AiderToken.AiderToken__InsufficientPayment.selector);
-        (bool success, ) = address(aiderToken).call{value: 0, sender: user1}("");
+        (bool success, ) = address(aiderToken).call{value: 0}(""); // Removed sender option
     }
 
 
