@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {AiderToken} from "../src/AiderToken.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol"; // Import Ownable for the error selector
 // No longer importing DeployScript as it's not used directly in tests
 
 contract AiderTokenTest is Test {
@@ -56,7 +57,7 @@ contract AiderTokenTest is Test {
         aiderToken.buyTokens{value: TOKEN_PRICE}();
 
         uint256 expectedTokens = 1 * (10**aiderToken.decimals()); // 1 token with 18 decimals
-        assertEq(aiderToken.balanceOf(user1), expectedTokens, "User1 should receive 1 token");
+        assertEq(aiderToken.balanceOf(user1), expectedTokens, "User1 token balance should match expected amount");
         assertEq(address(aiderToken).balance, initialContractEthBalance + TOKEN_PRICE, "Contract ETH balance should increase by exact price");
     }
 
@@ -70,7 +71,7 @@ contract AiderTokenTest is Test {
         aiderToken.buyTokens{value: ethToSend}();
 
         uint256 expectedTokens = 5 * (10**aiderToken.decimals()); // 5 tokens with 18 decimals
-        assertEq(aiderToken.balanceOf(user2), expectedTokens, "User2 should receive 5 tokens");
+        assertEq(aiderToken.balanceOf(user2), expectedTokens, "User2 token balance should match expected amount");
         assertEq(address(aiderToken).balance, initialContractEthBalance + ethToSend, "Contract ETH balance should increase by exact amount sent");
     }
 
@@ -88,7 +89,7 @@ contract AiderTokenTest is Test {
         uint256 txCost = tx.gasprice * gasUsed; // Approximate cost
 
         uint256 expectedTokens = 2 * (10**aiderToken.decimals());
-        assertEq(aiderToken.balanceOf(user1), expectedTokens, "User1 should receive 2 tokens");
+        assertEq(aiderToken.balanceOf(user1), expectedTokens, "User1 token balance should match expected amount after refund");
         // Contract balance increases only by the token cost, not the refund amount
         assertEq(address(aiderToken).balance, initialContractEthBalance + (TOKEN_PRICE * 2), "Contract ETH balance should increase by cost of 2 tokens");
         // User's ETH balance should decrease by the cost of tokens + gas, reflecting the refund
@@ -120,7 +121,7 @@ contract AiderTokenTest is Test {
         assertTrue(success, "Direct ETH transfer should succeed");
 
         uint256 expectedTokens = 1 * (10**aiderToken.decimals());
-        assertEq(aiderToken.balanceOf(user1), expectedTokens, "User1 should receive 1 token via receive()");
+        assertEq(aiderToken.balanceOf(user1), expectedTokens, "User1 token balance should match expected amount via receive()");
         assertEq(address(aiderToken).balance, initialContractEthBalance + TOKEN_PRICE, "Contract ETH balance should increase via receive()");
     }
 
@@ -136,7 +137,7 @@ contract AiderTokenTest is Test {
         assertTrue(success, "Direct ETH transfer with excess should succeed");
 
         uint256 expectedTokens = 3 * (10**aiderToken.decimals());
-        assertEq(aiderToken.balanceOf(user2), expectedTokens, "User2 should receive 3 tokens via receive()");
+        assertEq(aiderToken.balanceOf(user2), expectedTokens, "User2 token balance should match expected amount via receive() after refund");
         // Contract balance increases only by the token cost
         assertEq(address(aiderToken).balance, initialContractEthBalance + (TOKEN_PRICE * 3), "Contract ETH balance should increase by cost of 3 tokens via receive()");
          // User's ETH balance should decrease by the cost of tokens (gas estimation omitted here for simplicity, focus on refund)
@@ -151,16 +152,15 @@ contract AiderTokenTest is Test {
         (bool success, ) = address(aiderToken).call{value: TOKEN_PRICE - 1 wei}(""); // Removed sender option
         // The external call itself might succeed, but the internal logic reverts.
         // Foundry's expectRevert should catch this. If not, need a more specific check.
-        assertTrue(!success); // Alternatively, check if the call itself failed, though expectRevert is better.
+        // assertTrue(!success); // Removed redundant assertion - expectRevert handles the check.
     }
 
      function test_RevertWhen_Receive_ZeroAmount() public {
         // Sending zero ETH directly should revert inside buyTokens
         vm.prank(user1); // Set the sender for the next call
         vm.expectRevert(AiderToken.AiderToken__InsufficientPayment.selector);
-        (bool success, ) = address(aiderToken).call{value: 0}(""); // Removed sender option        
-        assertTrue(!success); // Alternatively, check if the call itself failed, though expectRevert is better.
-
+        (bool success, ) = address(aiderToken).call{value: 0}(""); // Removed sender option
+        // assertTrue(!success); // Removed redundant assertion - expectRevert handles the check.
     }
 
 
@@ -190,7 +190,8 @@ contract AiderTokenTest is Test {
         aiderToken.buyTokens{value: TOKEN_PRICE}();
 
         // Non-owner attempts to withdraw
-        vm.expectRevert("Ownable: caller is not the owner");
+        // Expect the OZ v5 error: OwnableUnauthorizedAccount(address account)
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, user2));
         vm.prank(user2); // Attempt withdrawal as user2
         aiderToken.withdraw();
     }
