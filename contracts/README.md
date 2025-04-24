@@ -1,16 +1,8 @@
-# Aider Token (AID)
+# Aider Token (AID) - Smart Contract
 
-This project implements a standard ERC20 token named "AIDER" with the symbol "AID" and 18 decimals, built using the Foundry framework and OpenZeppelin Contracts v5.
+This directory contains the Solidity smart contract (`AiderToken.sol`), tests, and deployment scripts for the Aider test project. This contract was developed using the Foundry framework and OpenZeppelin Contracts v5, largely guided by prompts given to Aider.
 
-## Features
-
-*   **ERC20 Standard:** Compliant with the ERC20 token standard.
-*   **Token Sale:** Users can purchase AIDER tokens directly from the contract.
-    *   **Price:** 1 AID = 0.1 ETH.
-    *   **Purchase:** Send ETH to the `buyTokens()` function or directly to the contract address (`receive()` function).
-    *   **Refunds:** If you send more ETH than needed for a whole number of tokens, the excess amount (less than 0.1 ETH) will be automatically refunded to you. You must send at least 0.1 ETH.
-*   **Ownable:** The contract includes ownership management using OpenZeppelin's `Ownable`, allowing the owner to withdraw collected ETH.
-*   **No Initial Supply:** Tokens are minted only when purchased.
+Refer to the main project [README.md](../README.md) for the overall project context.
 
 ## Development Environment
 
@@ -30,21 +22,22 @@ Foundry consists of:
 *   **Foundry Book:** https://book.getfoundry.sh/
 *   **OpenZeppelin Contracts:** https://docs.openzeppelin.com/contracts/5.x/
 
-## Setup
+## Setup (Inside `contracts` directory)
 
 1.  **Install Foundry:** Follow the instructions at https://book.getfoundry.sh/getting-started/installation
 2.  **Clone the repository:**
     ```shell
     git clone <your-repo-url>
-    cd <your-repo-directory>
+    cd contracts # Make sure you are in the contracts directory
     ```
 3.  **Install dependencies (OpenZeppelin):**
     ```shell
-    forge install
+    forge install OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-commit
+    forge install foundry-rs/forge-std --no-commit # If not already present
     ```
-    *(If you haven't already run `forge install OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-commit`)*
+    *(You might need to run `git submodule update --init --recursive` if `forge install` doesn't pull submodules)*
 
-## Usage
+## Usage (Inside `contracts` directory)
 
 ### Build
 
@@ -112,47 +105,4 @@ forge script script/AiderToken.s.sol:DeployScript --rpc-url http://127.0.0.1:854
 ```
 
 *   `--broadcast`: Sends the transaction to the local Anvil network.
-*   The script will output the deployed contract address. **Copy this address.**
-
-**Update Frontend:**
-
-*   Open `app/page.tsx` in your editor.
-*   Replace the placeholder value for `contractAddress` with the address you just copied from the deployment output.
-
-### Deploy to Base Sepolia
-
-Deploy the `AiderToken` contract to the Base Sepolia test network:
-
-**Prerequisites:**
-
-*   Set your Base Sepolia RPC URL as an environment variable: `export RPC_URL=<your_base_sepolia_rpc_url>`
-*   Set your deployer wallet's private key as an environment variable: `export PRIVATE_KEY=<your_private_key>` (Ensure this key is funded with Base Sepolia ETH).
-
-**Deployment Command:**
-
-```shell
-forge script script/AiderToken.s.sol:DeployScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify -vvvv
-```
-
-*   `--broadcast`: Sends the transaction to the network.
-*   `--verify`: Attempts to verify the contract source code on the block explorer (e.g., Basescan Sepolia). Requires setting `ETHERSCAN_API_KEY` for Base Sepolia.
-*   `-vvvv`: Increases verbosity for detailed output.
-
-### Interacting with the Contract (Cast)
-
-Use `cast` to interact with the deployed contract. Examples:
-
-*   **Check Token Name:** `cast call <CONTRACT_ADDRESS> "name()(string)" --rpc-url $RPC_URL`
-*   **Buy Tokens (Example: Buy 2 AID with exact ETH):** `cast send <CONTRACT_ADDRESS> "buyTokens()" --value 0.2ether --rpc-url $RPC_URL --private-key <your_user_private_key>`
-*   **Buy Tokens (Example: Send 0.25 ETH, receive 2 AID + 0.05 ETH refund):** `cast send <CONTRACT_ADDRESS> "buyTokens()" --value 0.25ether --rpc-url $RPC_URL --private-key <your_user_private_key>`
-*   **Buy Tokens via Direct Send (Example: Send 0.1 ETH):** `cast send <CONTRACT_ADDRESS> --value 0.1ether --rpc-url $RPC_URL --private-key <your_user_private_key>`
-*   **Check Balance:** `cast call <CONTRACT_ADDRESS> "balanceOf(address)(uint256)" <YOUR_ADDRESS> --rpc-url $RPC_URL`
-*   **Withdraw ETH (as owner):** `cast send <CONTRACT_ADDRESS> "withdraw()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY`
-
-### Help
-
-```shell
-forge --help
-anvil --help
-cast --help
-```
+*   The script will output the deployed contract address. **Copy this address.** You will need it for the frontend configuration (`app/page.tsx`).
