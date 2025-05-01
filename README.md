@@ -4,9 +4,9 @@ This project demonstrates using Aider, an AI pair programmer, to develop both a 
 
 The goal was to test Aider's capabilities in generating, modifying, and explaining code for both Solidity and TypeScript/React within a typical Web3 development workflow.
 
-**Watch the Video Walkthrough:** [Link to YouTube Video - Coming Soon!]
+**Watch the Video Walkthrough:** https://youtu.be/_2mDnr4EFWw
 
-**Read the Step-by-Step Guide:** [Link to Blog Post/Walkthrough - Coming Soon!]
+**Read the Step-by-Step Guide:** https://ethereum-blockchain-developer.com/advanced-mini-courses/aider-gemini-solidity-nextjs
 
 ## Project Structure
 
