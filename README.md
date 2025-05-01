@@ -37,4 +37,4 @@ You can start editing the frontend page by modifying `app/page.tsx`. The page au
 
 See the `contracts/README.md` for instructions on how to compile, test, and deploy the smart contract locally using Anvil before running the frontend. You will need to update the contract address in `app/page.tsx` after deployment.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
